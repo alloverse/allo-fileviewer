@@ -5,11 +5,20 @@ local vec3 = require("modules.vec3")
 local mat4 = require("modules.mat4")
 local pretty = require('pl.pretty')
 
+require 'poppler'
+
 local BOARD_RESOLUTION = 128
 
 class.DrawableSurface(ui.View)
 
 function DrawableSurface:_init(bounds)
+  file = "How to render PDF.pdf"
+  local doc = Document:open(file)
+  local page = doc:getPage(1)
+  local pageSize = page:size()
+  bounds.size.width = pageSize.width / BOARD_RESOLUTION
+  bounds.size.height = pageSize.height / BOARD_RESOLUTION
+
   self:super(bounds)
 
   self.isDirty = false;
@@ -23,6 +32,10 @@ function DrawableSurface:_init(bounds)
   self.cr = self.sr:context()
 
   self:clearBoard()
+
+  self.cr:save();
+  page:renderToCairoSurface(self.cr)
+  self.cr:restore();
 end
 
 function DrawableSurface:specification()
