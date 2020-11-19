@@ -15,7 +15,13 @@ typedef char gchar;
 typedef void PopplerDocument;
 typedef void PopplerPage;
 
+// glib
+bool g_path_is_absolute (const gchar *file_name);
+gchar *g_build_filename (const gchar *first_element, ...);
+gchar *g_filename_to_uri (const gchar *filename, const gchar *hostname, GError **error);
+gchar *g_get_current_dir (void);
 
+// poppler
 const char *poppler_get_version(void);
 
 // document
@@ -27,6 +33,7 @@ gchar *poppler_document_get_title(PopplerDocument *document);
 // page
 void poppler_page_get_size(PopplerPage *page, double *width, double *height);
 void poppler_page_render(PopplerPage *page, cairo_t *cairo);
+
 ]]
 
 --- objects --- 
@@ -53,10 +60,20 @@ end
 Document = {}
 
 --- Open a document
--- @tparam string uri A full format uri locating a file to open. 
+-- @tparam string file The file to open.
 -- @raise Throws a string message on error
-function Document:open(uri)
+function Document:open(file)
   local err = Error:new()
+
+  if ffi.C.g_path_is_absolute(file) == false then
+    current = ffi.string(ffi.C.g_get_current_dir())
+    file = ffi.string(ffi.C.g_build_filename(current, file))
+    file = ffi.string(ffi.C.g_filename_to_uri(file, nil, err.err))
+    err:throw()
+  end
+
+  print(file)
+  
   local doc = poppler.poppler_document_new_from_file(file, nil, err.err)
   err:throw()
   
@@ -123,15 +140,14 @@ function Page:renderToCairoSurface(surface)
   poppler.poppler_page_render(self.page, surface)
 end
 
-
 local function example()
-  file = "file:///System/Applications/Utilities/System Information.app/Contents/Resources/ProductGuides/ENERGY STAR.pdf"
-
-  doc = Document:open(file)
+  local doc = Document:open("How to render PDF.pdf")
   print(doc:title())
   print("Title: " .. doc:title())
   print(doc:pageCount() .. " pages")
-  page = doc:getPage(1)
-  size = page:size()
+  local page = doc:getPage(1)
+  local size = page:size()
   print("size: " .. size.width .. "x" .. size.height)
 end
+
+example()
