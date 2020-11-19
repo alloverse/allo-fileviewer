@@ -65,10 +65,10 @@ Document = {}
 function Document:open(file)
   local err = Error:new()
 
-  if ffi.C.g_path_is_absolute(file) == false then
-    current = ffi.string(ffi.C.g_get_current_dir())
-    file = ffi.string(ffi.C.g_build_filename(current, file))
-    file = ffi.string(ffi.C.g_filename_to_uri(file, nil, err.err))
+  if poppler.g_path_is_absolute(file) == false then
+    current = ffi.string(poppler.g_get_current_dir())
+    file = ffi.string(poppler.g_build_filename(current, file))
+    file = ffi.string(poppler.g_filename_to_uri(file, nil, err.err))
     err:throw()
   end
 

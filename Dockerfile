@@ -9,12 +9,13 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
    # build-essential \
     libcairo2 \
-    poppler-utils \
+    libpoppler-glib-dev \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
     
-# debian; libcairo does not match expected name so symlink it
-RUN ln -s /usr/lib/x86_64-linux-gnu/libcairo.so.2 /usr/lib/x86_64-linux-gnu/libcairo.so
+# debian; libs does not match expected names so we symlink it
+# RUN ln -s /usr/lib/x86_64-linux-gnu/libcairo.so.2 /usr/lib/x86_64-linux-gnu/libcairo.so
+# RUN ln -s /usr/lib/x86_64-linux-gnu/libpoppler.so.64 /usr/lib/x86_64-linux-gnu/libpoppler-glib.so
 
 ADD . /app/
 
