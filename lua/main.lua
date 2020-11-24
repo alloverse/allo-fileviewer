@@ -5,27 +5,25 @@ package.path = string.format(
 
 
 
-local Whiteboard = require("whiteboard")
+local FileViewer = require("fileviewer")
 
 local client = Client(
     arg[2], 
-    "allo-whiteboard"
+    "allo-fileviewer"
 )
 local app = App(client)
 
-print("+===================+")
-print("+ ADDING WHITEBOARD +")
-print("+===================+")
+print("+====================+")
+print("+ ADDING FILE VIEWER +")
+print("+====================+")
 
-local whiteboard = Whiteboard(ui.Bounds(1.5, 1, 0,   2, 1, 0.1))
+local fileviewer = FileViewer(ui.Bounds(-1, 2, -1,   1, 0.5, 0.1))
 
-app.mainView = whiteboard
+app.mainView = fileviewer
 
--- Checks whiteboard refresh 20 times per second
-app:scheduleAction(0.05, true, function()
-  
-  whiteboard:update()
-
+--Checks fileviewer refresh 10 times per second
+app:scheduleAction(1, true, function()
+  fileviewer:update()
 end)
 
 app:connect()
