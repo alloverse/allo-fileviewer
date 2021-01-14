@@ -8,8 +8,6 @@ class.FileViewer(ui.View)
 function FileViewer:_init(bounds)
   self:super(bounds)
 
-  print("file viewer init")
-
   self.fileSurface = FileSurface(ui.Bounds{size=bounds.size})
   self:addSubview(self.fileSurface)
 
@@ -43,23 +41,35 @@ function FileViewer:specification()
 end
 
 function FileViewer:update()
-  self.fileSurface:sendIfDirty()
+  print("update")
+
+  -- Looks at the resizeHandle's position (if it exists)
+  if self.resizeHandle ~= nil then 
+    local m = mat4.new(self.resizeHandle.entity.components.transform.matrix) 
+    local resizeHandlePosition = m * vec3(0,0,0)
+
+    local newWidth = resizeHandlePosition.x*2 - self.SPACING*2
+    local newHeight = resizeHandlePosition.y*2 - self.SPACING*2
+
+    if newWidth <= 1.13 then newWidth = 1.13 end
+    if newHeight <= 0.5 then newHeight = 0.5 end
+
+    self:resize(newWidth, newHeight)
+  end
+  
 end
 
 function FileViewer:resize(newWidth, newHeight)
   self.fileSurface:resize(newWidth, newHeight)
-
   self:layout()
 end
 
 function FileViewer:layout()
-  -- Set correct position of all buttons
-  
+  -- Sets the correct position of all buttons, in relation to the size of the FileSurface
   self.half_width = self.fileSurface.bounds.size.width/2
   self.half_height = self.fileSurface.bounds.size.height/2
-
+  
   self.quitButton:setBounds(ui.Bounds{pose=ui.Pose(self.half_width+self.SPACING - self.BUTTON_SIZE, self.half_height+self.SPACING, 0), size=self.quitButton.bounds.size})
-
   self.grabHandle:setBounds(ui.Bounds{pose=ui.Pose(-self.half_width-self.SPACING, -self.half_height-self.SPACING, 0.0), size=self.grabHandle.bounds.size})
 end
 
