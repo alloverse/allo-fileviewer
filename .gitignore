@@ -6,3 +6,4 @@ allo/**/allonet.cache
 allo/**/builds.json
 **/*.DS_Store
 **/fileSurface.png
+client_asset_cache/

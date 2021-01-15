@@ -140,6 +140,7 @@ function Page:renderToCairoSurface(surface)
   poppler.poppler_page_render(self.page, surface)
 end
 
+--- Example code
 local function example()
   local doc = Document:open("How to render PDF.pdf")
   print(doc:title())
@@ -150,4 +151,5 @@ local function example()
   print("size: " .. size.width .. "x" .. size.height)
 end
 
-example()
+--- Uncomment if you want to run the example code
+--- example()

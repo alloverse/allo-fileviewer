@@ -21,8 +21,8 @@ local fileviewer = FileViewer(ui.Bounds(-1, 2, -1,   1, 0.5, 0.1))
 
 app.mainView = fileviewer
 
---Checks fileviewer refresh every 3 seconds
-app:scheduleAction(3, true, function()
+--Checks fileviewer refresh every second
+app:scheduleAction(1, true, function()
   fileviewer:update()
 end)
 
