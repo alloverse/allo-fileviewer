@@ -38,7 +38,6 @@ function FileSurface:_init(bounds)
   page:renderToCairoSurface(self.cr)
   self.cr:restore();
 
-
   self.cr:source(self.sr)
   self.cr:paint()
 
@@ -74,12 +73,16 @@ function FileSurface:specification()
           uvs=        {{0.0, 1.0},        {1.0, 1.0},       {0.0, 0.0},        {1.0, 0.0}},
           triangles=  {{0, 1, 3},         {3, 2, 0},        {0, 2, 3},         {3, 1, 0}},
       },
-      material = {
-        texture = encoded_image
-      },
       collider= {
           type= "box",
           width= s.width, height= s.height, depth= s.depth
+      },
+      material = {
+        texture = encoded_image
+      },
+      grabbable = {
+        grabbable = true,
+        actuate_on= "$parent"
       }
   })
 
@@ -104,20 +107,23 @@ function FileSurface:resize(newWidth, newHeight)
   local newCalculatedWidth = newWidth * BOARD_RESOLUTION
   local newCalculatedHeight = newHeight * BOARD_RESOLUTION
 
-  local newsr = cairo.image_surface(cairo.cairo_format("rgb24"), newCalculatedWidth, newCalculatedHeight)  
-  local newcr = newsr:context()
 
-  newcr:source(self.sr, 0, 0)
+  self:loadPdfToSurface("test.pdf")
 
-  self.sr = newsr
-  self.cr = newcr
-  self.cr:paint()
 
-  --self:loadPdfToSurface("test.pdf")
+  -- local newsr = cairo.image_surface(cairo.cairo_format("rgb24"), newCalculatedWidth, newCalculatedHeight)  
+  -- local newcr = newsr:context()
 
-  self:updateComponents(
-    self:specification()
-  )
+  -- newcr:source(self.sr, 0, 0)
+
+  -- self.sr = newsr
+  -- self.cr = newcr
+  -- self.cr:paint()
+
+
+  -- self:updateComponents(
+  --   self:specification()
+  -- )
 end
 
 
@@ -135,6 +141,13 @@ function FileSurface:loadPdfToSurface(file)
   self.cr:save()
   page:renderToCairoSurface(self.cr)
   self.cr:restore()
+
+  self.cr:source(self.sr)
+  self.cr:paint()
+
+  self:updateComponents(
+    self:specification()
+  )
 end
 
 function FileSurface:broadcastTextureChanged()

@@ -16,13 +16,9 @@ function FileViewer:_init(bounds)
   self.BUTTON_SIZE = 0.2
   self.SPACING = 0.13;
   
-  -- GRAB HANDLE
-  self.grabHandle = ui.GrabHandle(ui.Bounds(-self.half_width-self.SPACING, -self.half_height-self.SPACING, 0.0, self.BUTTON_SIZE, self.BUTTON_SIZE, self.BUTTON_SIZE))
-  self:addSubview(self.grabHandle)
-  
   -- RESIZE HANDLE
-  -- self.resizeHandle = ui.ResizeHandle(ui.Bounds(self.half_width+self.SPACING, self.half_height+self.SPACING, 0, self.BUTTON_SIZE, self.BUTTON_SIZE, self.BUTTON_SIZE), {1, 1, 0}, {0, 0, 0})
-  -- self:addSubview(self.resizeHandle)
+  self.resizeHandle = ui.ResizeHandle(ui.Bounds(self.half_width+self.SPACING, self.half_height+self.SPACING, 0, self.BUTTON_SIZE, self.BUTTON_SIZE, self.BUTTON_SIZE), {1, 1, 0}, {0, 0, 0})
+  self:addSubview(self.resizeHandle)
 
   -- QUIT BUTTON
   self.quitButton = ui.Button(ui.Bounds{size=ui.Size(0.12,0.12,0.05)}:move( 0.52,0.25,0.025))
@@ -41,7 +37,6 @@ function FileViewer:specification()
 end
 
 function FileViewer:update()
-  --print("update")
 
   -- Looks at the resizeHandle's position (if it exists)
   if self.resizeHandle ~= nil then 
@@ -70,7 +65,6 @@ function FileViewer:layout()
   self.half_height = self.fileSurface.bounds.size.height/2
   
   self.quitButton:setBounds(ui.Bounds{pose=ui.Pose(self.half_width+self.SPACING - self.BUTTON_SIZE, self.half_height+self.SPACING, 0), size=self.quitButton.bounds.size})
-  self.grabHandle:setBounds(ui.Bounds{pose=ui.Pose(-self.half_width-self.SPACING, -self.half_height-self.SPACING, 0.0), size=self.grabHandle.bounds.size})
 end
 
 
