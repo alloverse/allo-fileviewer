@@ -72,7 +72,7 @@ function Document:open(file)
     err:throw()
   end
 
-  print(file)
+  --print(file)
   
   local doc = poppler.poppler_document_new_from_file(file, nil, err.err)
   err:throw()

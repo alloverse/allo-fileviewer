@@ -5,7 +5,7 @@ local vec3 = require("modules.vec3")
 local mat4 = require("modules.mat4")
 local pretty = require('pl.pretty')
 
-local BOARD_RESOLUTION = 512
+local BOARD_RESOLUTION = 256
 
 require 'poppler'
 
@@ -15,9 +15,17 @@ function FileSurface:_init(bounds)
   -- ? Sets the bounds of "ui.View" to be that which was passed to this init function
   self:super(bounds)
 
+  -- Define the default file to be used
+  self.defaultFile = "test_multipage.pdf"
+  
   -- Uses poppler to load the pdf file and read info about it
-  file = "test.pdf"
+  file = self.defaultFile
   local doc = Document:open(file)
+  
+  print("pageCount: ", doc:pageCount())
+  self.pageCount = doc:pageCount()
+  self.currentPage = 1
+
   local page = doc:getPage(1)
   local pageSize = page:size()
   print("Page size:", pageSize.width, " x ", pageSize.height)
@@ -26,8 +34,8 @@ function FileSurface:_init(bounds)
   bounds.size.width = pageSize.width/BOARD_RESOLUTION
   bounds.size.height = pageSize.height/BOARD_RESOLUTION
 
-  print("bounds.size.width:", bounds.size.width)
-  print("bounds.size.height:", bounds.size.height)
+  -- print("bounds.size.width:", bounds.size.width)
+  -- print("bounds.size.height:", bounds.size.height)
 
   -- Creates a cairo image surface matching the pixel size of the actual file
   self.sr = cairo.image_surface(cairo.cairo_format("rgb24"), pageSize.width, pageSize.height)
@@ -35,6 +43,8 @@ function FileSurface:_init(bounds)
 
   -- Renders the file to the surface.
   self.cr:save();
+  self.cr:rgb(255, 255, 255)
+  self.cr:paint()
   page:renderToCairoSurface(self.cr)
   self.cr:restore();
 
@@ -59,8 +69,6 @@ function FileSurface:specification()
   fh:close()
   local encoded_image = ui.util.base64_encode(image_to_convert)
   
-
-
   local s = self.bounds.size
   local w2 = s.width / 2.0
   local h2 = s.height / 2.0
@@ -107,38 +115,39 @@ function FileSurface:resize(newWidth, newHeight)
   local newCalculatedWidth = newWidth * BOARD_RESOLUTION
   local newCalculatedHeight = newHeight * BOARD_RESOLUTION
 
-
-  self:loadPdfToSurface("test.pdf")
-
-
-  -- local newsr = cairo.image_surface(cairo.cairo_format("rgb24"), newCalculatedWidth, newCalculatedHeight)  
-  -- local newcr = newsr:context()
-
-  -- newcr:source(self.sr, 0, 0)
-
-  -- self.sr = newsr
-  -- self.cr = newcr
-  -- self.cr:paint()
-
-
-  -- self:updateComponents(
-  --   self:specification()
-  -- )
+  self:loadPdfToSurface(self.defaultFile)
 end
 
 
+function FileSurface:goToNextPage()
+  self.currentPage = (self.currentPage % self.pageCount) + 1
+  self:loadPdfToSurface(self.defaultFile)
+end
 
+function FileSurface:goToPreviousPage()
+  
+  local i = self.currentPage - 1
+  -- LUL it's late and I couldn't get my modulo formula to work
+  if i == 0 then
+    i = self.pageCount
+  end
+  self.currentPage = i  
+
+  self:loadPdfToSurface(self.defaultFile)
+end
 
 
 function FileSurface:loadPdfToSurface(file)
-  print("loading pdf to surface")
-
   local doc = Document:open(file)
-  local page = doc:getPage(1)
+  local page = doc:getPage(self.currentPage)
   local pageSize = page:size()
-  print("Page size:", pageSize.width, " x ", pageSize.height)
+
+  -- print("Page size:", pageSize.width, " x ", pageSize.height)
+  -- print("Current page: ", self.currentPage)
 
   self.cr:save()
+  self.cr:rgb(255, 255, 255)
+  self.cr:paint()
   page:renderToCairoSurface(self.cr)
   self.cr:restore()
 
@@ -164,11 +173,5 @@ function FileSurface:sendIfDirty()
   end
 end
 
-function FileSurface:wait(time)
-  print("waiting for ", time, "seconds")
-  local duration = os.time() + time
-  while os.time() < duration do end
-  print("done!")
-end
 
 return FileSurface

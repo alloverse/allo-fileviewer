@@ -17,8 +17,26 @@ function FileViewer:_init(bounds)
   self.SPACING = 0.13;
   
   -- RESIZE HANDLE
-  self.resizeHandle = ui.ResizeHandle(ui.Bounds(self.half_width+self.SPACING, self.half_height+self.SPACING, 0, self.BUTTON_SIZE, self.BUTTON_SIZE, self.BUTTON_SIZE), {1, 1, 0}, {0, 0, 0})
+  self.resizeHandle = ui.ResizeHandle(ui.Bounds(self.half_width+self.SPACING, self.half_height+self.SPACING, 0.05, self.BUTTON_SIZE, self.BUTTON_SIZE, self.BUTTON_SIZE), {1, 1, 0}, {0, 0, 0})
   self:addSubview(self.resizeHandle)
+
+  
+  -- PREVIOUS PAGE BUTTON
+  self.previousPageButton = ui.Button(ui.Bounds(-self.half_width-self.SPACING, 0, 0.05, self.BUTTON_SIZE, self.BUTTON_SIZE, self.BUTTON_SIZE), {1, 1, 0}, {0, 0, 0})
+  self.previousPageButton:setDefaultTexture("iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAKFSURBVHgB7ZsxbxNBEIXfRnRxonQonYNkWqiQK2ynR6FGCJogIQqSUICEEoKJaPG5TYUEfyAClxEJFVAES3REAncWVEg56mPG9kWbxeXe7uR2P2m15zk382bW0s54FAyyLGvSdpPWCq0qykF/stpKqcHUb5DjC7Q6WflhHxdyv1XuPG0faF1FGHA2tCgb/sxMDNsIx3mGfWWfoSj6Vdp/6m+Hw9/YaSc4Pv6Bk5O/OO9cb9Sx8WgVi4sXzVctFuA1PdzNLez8ndsPS+G4TmVuFm/edk0RunwEruiWzqvd0jnPpOTTTrtrmldYgDNn/+PhZ5SV73SkDaozCIh0SmYHJcA0ogAInCgAAicKgMCJAiBwogAInAuwyKcv7858rl+7AVvM0XV2c2sdTx6/hE2sClAUDSpobD5bH4lgG9EC5FFvNOsoCrECFBl1HXECuIi6jigBXEVdR4QArqOu410AH1HX8SaAz6jreBHAd9R1nAogJeo6zgSQFHUdZ5ehSmUWaZpCGs4E6PX28eD+U/Te70MSTq/Do67zi2TUeR4Of0ECXuoBkrLBW0FESjZ4rwj5zgYRJTGf2SCqJugjG8QVRV1ng9iqsKtsEF0Wd5EN56IqzNlwdPQNq/duwTb8N7lMN9is5UvE7F3E1hgCJwqAwIkCIHCiAAicKAACJwpgGqQ1LoqGBRjohlrtEsoKD08Z9FmAPd2ytS2vfWWD+fnKaHLMoM/X4SbGQ5OncCEi6ezi8MDP/JBSCrbgYNYuL1FTdm3a2NxSPjma0LaGsEhI6I1QR2e/0lo+HZ3lB9patLooN1z94mxfnviM/w7bZJT2OcYDla4yIkOxDDD+sd8jxw/0F/8AwW/MYvMHEacAAAAASUVORK5CYII=")
+  self.previousPageButton.onActivated = function()
+    self:goToPreviousPage()
+  end
+  self:addSubview(self.previousPageButton)
+  
+  -- NEXT PAGE BUTTON
+  self.nextPageButton = ui.Button(ui.Bounds(self.half_width+self.SPACING, 0, 0.05, self.BUTTON_SIZE, self.BUTTON_SIZE, self.BUTTON_SIZE), {1, 1, 0}, {0, 0, 0})
+  self.nextPageButton:setDefaultTexture("iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAYAAACqaXHeAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAJ6SURBVHgB7Zu/b9NAFMe/V7ElqTqBsqVIYYUJdYKmjIDKH4BgYaYtM6GEVGIjzoJQYUACsVf8ATRMgaWZW6nNVqlTpbaz+15+VNert559Z7/7SKdzzlne933PvrP9FAziOF6k7hm1ZWo1FIPBpLWUUsPEf1Dgc9Q6cfHhGOemcatp8NT9oXYPMmA3NMgNxzOTgXXICZ7hWDlmKMp+jfoD/ezh4RHarQh7e/s4OTlD3nnwcAFrb16hWr1lnmqwAN/p4OV0hIN/8fx1IQLXKVdK+PGza4rQ5SlwVx/pfNosXPDMKcXUbnXN4WUW4NLc/9v7h6KyS1PaoDYDQZwmOFuUAEkEASCcIACEEwSAcIIAEE4QAMK5AYs0363i29dfoy21Lfr/f1/6vXD/KWxi1QGPnzzC5y8fR31esD4FqtWbIydw42PfSe0akBc3pHoRzIMbMrkL+OyGzG6Dvroh83WAb25wshDyyQ1OV4I+uMH5Uti1G7zZC7hyg1eboXK5lPjsPk2sboauQ2+7j412lPlrOecCcMAbHyL0en24wKkArrKu40QA11nXyVwAH7Kuk5kAPmVdJxMBfMu6TqoC+Jp1ndQE8DnrOtYFyEPWdawKkJes6/BncrE+YPu5u2+Y7xnCqzEIJwgA4QQBIJwgAIQTBIBwggDmQKVSgiRYgKE+UK/fRlHh4imDAQuwpY8011cL6YLZ2fKocsxgwNvhRYyLJi/gz9yizibt793UDymlYAtOZv3OPN42V5LK5uanlaMRdSuQRURCr0ktnd2htnRROssH1DWodVFs+OkXu31pEjOuTLZJKe17jAsqs3JEjHQZYnyx36LAt/UT5+KV2TiURS+aAAAAAElFTkSuQmCC")
+  self.nextPageButton.onActivated = function()
+    self:goToNextPage()
+  end
+  self:addSubview(self.nextPageButton)
+ 
 
   -- QUIT BUTTON
   self.quitButton = ui.Button(ui.Bounds{size=ui.Size(0.12,0.12,0.05)}:move( 0.52,0.25,0.025))
@@ -59,12 +77,27 @@ function FileViewer:resize(newWidth, newHeight)
   self:layout()
 end
 
+function FileViewer:goToNextPage()
+  self.fileSurface:goToNextPage()
+end
+
+function FileViewer:goToPreviousPage()
+  self.fileSurface:goToPreviousPage()
+end
+
 function FileViewer:layout()
   -- Sets the correct position of all buttons, in relation to the size of the FileSurface
   self.half_width = self.fileSurface.bounds.size.width/2
   self.half_height = self.fileSurface.bounds.size.height/2
   
-  self.quitButton:setBounds(ui.Bounds{pose=ui.Pose(self.half_width+self.SPACING - self.BUTTON_SIZE, self.half_height+self.SPACING, 0), size=self.quitButton.bounds.size})
+  self.quitButton:setBounds(ui.Bounds{pose=ui.Pose(self.half_width+self.SPACING - self.BUTTON_SIZE, self.half_height+self.SPACING, 0.05), size=self.quitButton.bounds.size})
+
+  if self.fileSurface.pageCount > 1 then 
+    -- handle multi page buttons here
+    self.nextPageButton:setBounds(ui.Bounds{pose=ui.Pose(self.half_width+self.SPACING, 0, 0.05), size=self.nextPageButton.bounds.size})
+    self.previousPageButton:setBounds(ui.Bounds{pose=ui.Pose(-self.half_width-self.SPACING, 0, 0.05), size=self.previousPageButton.bounds.size})  
+  end
+
 end
 
 
