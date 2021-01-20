@@ -5,7 +5,7 @@ local vec3 = require("modules.vec3")
 local mat4 = require("modules.mat4")
 local pretty = require('pl.pretty')
 
-local BOARD_RESOLUTION = 256
+local PIXELS_PER_METER = 256
 
 require 'poppler'
 
@@ -27,18 +27,18 @@ function FileSurface:_init(bounds)
   self.currentPage = 1
 
   local page = doc:getPage(1)
-  local pageSize = page:size()
-  print("Page size:", pageSize.width, " x ", pageSize.height)
+  local pageSizePx = page:size()
+  --print("Page size (px):", pageSizePx.width, " x ", pageSizePx.height)
 
   -- Sets the size of the FileSurface
-  bounds.size.width = pageSize.width/BOARD_RESOLUTION
-  bounds.size.height = pageSize.height/BOARD_RESOLUTION
+  bounds.size.width = pageSizePx.width/PIXELS_PER_METER
+  bounds.size.height = pageSizePx.height/PIXELS_PER_METER
 
   -- print("bounds.size.width:", bounds.size.width)
   -- print("bounds.size.height:", bounds.size.height)
 
   -- Creates a cairo image surface matching the pixel size of the actual file
-  self.sr = cairo.image_surface(cairo.cairo_format("rgb24"), pageSize.width, pageSize.height)
+  self.sr = cairo.image_surface(cairo.cairo_format("rgb24"), pageSizePx.width, pageSizePx.height)
   self.cr = self.sr:context()
 
   -- Renders the file to the surface.
@@ -112,9 +112,6 @@ function FileSurface:resize(newWidth, newHeight)
   self.bounds.size.width = newWidth
   self.bounds.size.height = newHeight
 
-  local newCalculatedWidth = newWidth * BOARD_RESOLUTION
-  local newCalculatedHeight = newHeight * BOARD_RESOLUTION
-
   self:loadPdfToSurface(self.defaultFile)
 end
 
@@ -140,9 +137,9 @@ end
 function FileSurface:loadPdfToSurface(file)
   local doc = Document:open(file)
   local page = doc:getPage(self.currentPage)
-  local pageSize = page:size()
+  local pageSizePx = page:size()
 
-  -- print("Page size:", pageSize.width, " x ", pageSize.height)
+  -- print("Page size:", pageSizePx.width, " x ", pageSizePx.height)
   -- print("Current page: ", self.currentPage)
 
   self.cr:save()
