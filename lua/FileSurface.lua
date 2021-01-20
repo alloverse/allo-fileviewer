@@ -5,7 +5,7 @@ local vec3 = require("modules.vec3")
 local mat4 = require("modules.mat4")
 local pretty = require('pl.pretty')
 
-local PIXELS_PER_METER = 256
+local PIXELS_PER_METER = 512
 
 require 'poppler'
 
@@ -16,14 +16,17 @@ function FileSurface:_init(bounds)
   self:super(bounds)
 
   -- Define the default file to be used
-  self.defaultFile = "test_multipage.pdf"
+  self.defaultFileName = "test.pdf"
   
   -- Uses poppler to load the pdf file and read info about it
-  file = self.defaultFile
+  file = self.defaultFileName
   local doc = Document:open(file)
   
-  print("pageCount: ", doc:pageCount())
-  self.pageCount = doc:pageCount()
+
+  print("Opening '" .. self.defaultFileName .. "' with " .. doc:pageCount() .. " pages" )
+  
+  --self.documentTitle = doc:title() 
+  self.pageCount = doc:pageCount() or 1
   self.currentPage = 1
 
   local page = doc:getPage(1)
@@ -112,13 +115,13 @@ function FileSurface:resize(newWidth, newHeight)
   self.bounds.size.width = newWidth
   self.bounds.size.height = newHeight
 
-  self:loadPdfToSurface(self.defaultFile)
+  self:loadPdfToSurface(self.defaultFileName)
 end
 
 
 function FileSurface:goToNextPage()
   self.currentPage = (self.currentPage % self.pageCount) + 1
-  self:loadPdfToSurface(self.defaultFile)
+  self:loadPdfToSurface(self.defaultFileName)
 end
 
 function FileSurface:goToPreviousPage()
@@ -130,7 +133,7 @@ function FileSurface:goToPreviousPage()
   end
   self.currentPage = i  
 
-  self:loadPdfToSurface(self.defaultFile)
+  self:loadPdfToSurface(self.defaultFileName)
 end
 
 
