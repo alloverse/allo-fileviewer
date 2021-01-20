@@ -11,6 +11,16 @@ require 'poppler'
 
 class.FileSurface(ui.View)
 
+function FileSurface:redraw()
+  -- Saves the cairo surface context to disk as a png
+  self.sr:save_png("fileSurface.png")
+
+  -- Opens said png and converts it to base64
+  local fh = io.open("fileSurface.png", "rb")
+  self.image_data = fh:read("*a")
+  fh:close()
+end
+
 function FileSurface:_init(bounds)
   -- ? Sets the bounds of "ui.View" to be that which was passed to this init function
   self:super(bounds)
@@ -38,29 +48,18 @@ function FileSurface:_init(bounds)
   page:renderToCairoSurface(self.cr)
   self.cr:restore();
 
-
   self.cr:source(self.sr)
   self.cr:paint()
+
+  self:redraw()
 
   self:updateComponents(
     self:specification()
   )
-
 end
 
 
 function FileSurface:specification()
-
-  -- Saves the cairo surface context to disk as a png
-  self.sr:save_png("fileSurface.png")
-
-  -- Opens said png and converts it to base64
-  local fh = io.open("fileSurface.png", "rb")
-  local image_to_convert = fh:read("*a")
-  fh:close()
-  local encoded_image = ui.util.base64_encode(image_to_convert)
-  
-
 
   local s = self.bounds.size
   local w2 = s.width / 2.0
@@ -75,7 +74,7 @@ function FileSurface:specification()
           triangles=  {{0, 1, 3},         {3, 2, 0},        {0, 2, 3},         {3, 1, 0}},
       },
       material = {
-        texture = encoded_image
+        texture_asset = "page"
       },
       collider= {
           type= "box",
@@ -113,6 +112,8 @@ function FileSurface:resize(newWidth, newHeight)
   self.cr = newcr
   self.cr:paint()
 
+  self:redraw()
+
   --self:loadPdfToSurface("test.pdf")
 
   self:updateComponents(
@@ -135,6 +136,7 @@ function FileSurface:loadPdfToSurface(file)
   self.cr:save()
   page:renderToCairoSurface(self.cr)
   self.cr:restore()
+  self:redraw()
 end
 
 function FileSurface:broadcastTextureChanged()
