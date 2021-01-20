@@ -17,7 +17,7 @@ print("+====================+")
 print("+ ADDING FILE VIEWER +")
 print("+====================+")
 
-local fileviewer = FileViewer(ui.Bounds(-1, 2, -1,   1, 0.5, 0.1))
+local fileviewer = FileViewer(ui.Bounds(-1, 2, -1,   1, 0.5, 0.01))
 
 app.mainView = fileviewer
 

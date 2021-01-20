@@ -5,7 +5,7 @@ local vec3 = require("modules.vec3")
 local mat4 = require("modules.mat4")
 local pretty = require('pl.pretty')
 
-local PIXELS_PER_METER = 512
+local PIXELS_PER_METER = 256
 
 require 'poppler'
 
@@ -16,7 +16,7 @@ function FileSurface:_init(bounds)
   self:super(bounds)
 
   -- Define the default file to be used
-  self.defaultFileName = "test.pdf"
+  self.defaultFileName = "test_multipage.pdf"
   
   -- Uses poppler to load the pdf file and read info about it
   file = self.defaultFileName
