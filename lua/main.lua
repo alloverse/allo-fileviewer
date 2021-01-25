@@ -24,11 +24,11 @@ app.mainView = fileviewer
 local allonet = app.client.client
 
 allonet:set_asset_request_callback(function(name, offset, length)
-  if string.sub(name, 1, -2) ~= "page" or fileviewer.fileSurface.image_data == nil or string.len(fileviewer.fileSurface.image_data) == 0 then 
-    allonet:asset_send(name, nil, offset, 0)
-  else
+  if string.find(name, "page") and fileviewer.fileSurface.image_data ~= nil and string.len(fileviewer.fileSurface.image_data) ~= 0 then 
     local data = string.sub(fileviewer.fileSurface.image_data, offset, offset+length-1)
     allonet:asset_send(name, data, offset, string.len(data))
+  else
+    allonet:asset_send(name, nil, offset, 0)
   end
 end)
 
