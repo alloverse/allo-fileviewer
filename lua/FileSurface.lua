@@ -37,6 +37,7 @@ function FileSurface:_init(bounds)
   -- Uses poppler to load the pdf file and read info about it
   file = self.defaultFileName
   local doc = Document:open(file)
+  self.doc = doc
   
 
   print("Opening '" .. self.defaultFileName .. "' with " .. doc:pageCount() .. " pages" )
@@ -145,7 +146,7 @@ end
 
 
 function FileSurface:loadPdfToSurface(file)
-  local doc = Document:open(file)
+  local doc = self.doc
   local page = doc:getPage(self.currentPage)
   local pageSizePx = page:size()
 
