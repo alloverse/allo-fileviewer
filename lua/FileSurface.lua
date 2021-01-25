@@ -32,7 +32,7 @@ function FileSurface:_init(bounds)
   self:super(bounds)
 
   -- Define the default file to be used
-  self.defaultFileName = "test_multipage.pdf"
+  self.defaultFileName = "alloverse_pitch_deck.pdf"
   
   -- Uses poppler to load the pdf file and read info about it
   file = self.defaultFileName
