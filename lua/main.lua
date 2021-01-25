@@ -21,6 +21,17 @@ local fileviewer = FileViewer(ui.Bounds(-1, 2, -1,   1, 0.5, 0.01))
 
 app.mainView = fileviewer
 
+local allonet = app.client.client
+
+allonet:set_asset_request_callback(function(name, offset, length)
+  if string.find(name, "page") and fileviewer.fileSurface.image_data ~= nil and string.len(fileviewer.fileSurface.image_data) ~= 0 then 
+    local data = string.sub(fileviewer.fileSurface.image_data, offset, offset+length-1)
+    allonet:asset_send(name, data, offset, string.len(data))
+  else
+    allonet:asset_send(name, nil, offset, 0)
+  end
+end)
+
 --Checks fileviewer refresh every second
 app:scheduleAction(1, true, function()
   fileviewer:update()

@@ -11,6 +11,22 @@ require 'poppler'
 
 class.FileSurface(ui.View)
 
+function readall(filename)
+  local fh = assert(io.open(filename, "rb"))
+  local contents = assert(fh:read(_VERSION <= "Lua 5.2" and "*a" or "a"))
+  fh:close()
+  return contents
+end
+
+function FileSurface:redraw()
+  -- Saves the cairo surface context to disk as a png
+  self.sr:save_png("fileSurface.png")
+
+  -- Opens said png into memory
+  self.image_data = readall("fileSurface.png")
+  print(string.len(self.image_data))
+end
+
 function FileSurface:_init(bounds)
   -- ? Sets the bounds of "ui.View" to be that which was passed to this init function
   self:super(bounds)
@@ -21,6 +37,7 @@ function FileSurface:_init(bounds)
   -- Uses poppler to load the pdf file and read info about it
   file = self.defaultFileName
   local doc = Document:open(file)
+  self.doc = doc
   
 
   print("Opening '" .. self.defaultFileName .. "' with " .. doc:pageCount() .. " pages" )
@@ -54,24 +71,16 @@ function FileSurface:_init(bounds)
   self.cr:source(self.sr)
   self.cr:paint()
 
+  self:redraw()
+
   self:updateComponents(
     self:specification()
   )
-
 end
 
 
 function FileSurface:specification()
-
-  -- Saves the cairo surface context to disk as a png
-  self.sr:save_png("fileSurface.png")
-
-  -- Opens said png and converts it to base64
-  local fh = io.open("fileSurface.png", "rb")
-  local image_to_convert = fh:read("*a")
-  fh:close()
-  local encoded_image = ui.util.base64_encode(image_to_convert)
-  
+  self:redraw()
   local s = self.bounds.size
   local w2 = s.width / 2.0
   local h2 = s.height / 2.0
@@ -89,7 +98,7 @@ function FileSurface:specification()
           width= s.width, height= s.height, depth= s.depth
       },
       material = {
-        texture = encoded_image
+        asset_texture = "page"..self.currentPage
       },
       grabbable = {
         grabbable = true,
@@ -118,7 +127,6 @@ function FileSurface:resize(newWidth, newHeight)
   self:loadPdfToSurface(self.defaultFileName)
 end
 
-
 function FileSurface:goToNextPage()
   self.currentPage = (self.currentPage % self.pageCount) + 1
   self:loadPdfToSurface(self.defaultFileName)
@@ -138,7 +146,7 @@ end
 
 
 function FileSurface:loadPdfToSurface(file)
-  local doc = Document:open(file)
+  local doc = self.doc
   local page = doc:getPage(self.currentPage)
   local pageSizePx = page:size()
 
@@ -151,9 +159,12 @@ function FileSurface:loadPdfToSurface(file)
   page:renderToCairoSurface(self.cr)
   self.cr:restore()
 
+  self:redraw()
+
   self.cr:source(self.sr)
   self.cr:paint()
 
+  self:redraw()
   self:updateComponents(
     self:specification()
   )
