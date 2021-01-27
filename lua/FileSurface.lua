@@ -22,7 +22,6 @@ function FileSurface:_init(bounds, assetManager)
   -- Uses poppler to load the pdf file and read info about it
   file = self.defaultFileName
   local doc = Document:open(file)
-  self.doc = doc
 
   local pageSizePx = doc:getPage(1):size()
   -- Sets the size of the FileSurface
@@ -31,7 +30,8 @@ function FileSurface:_init(bounds, assetManager)
 
   self.assets = {}
   for i = 1, doc:pageCount() do
-    local asset = self:_render(i)
+    local page = doc:getPage(i)
+    local asset = self:_render(page)
     table.insert(self.assets, asset)
     assetManager:add(asset)
   end
@@ -42,8 +42,7 @@ function FileSurface:_init(bounds, assetManager)
 end
 
 -- Render a page to an asset
-function FileSurface:_render(pagenr)
-  local page = self.doc:getPage(pagenr)
+function FileSurface:_render(page)
   local pageSizePx = page:size()
   
   -- Creates a cairo image surface matching the pixel size of the actual file
@@ -109,7 +108,6 @@ function FileSurface:resize(newWidth, newHeight)
   self.bounds.size.width = newWidth
   self.bounds.size.height = newHeight
 
-  print("resized")
   self:updateComponents(self:specification())
 end
 
