@@ -5,10 +5,10 @@ local FileSurface = require("FileSurface")
 
 class.FileViewer(ui.View)
 
-function FileViewer:_init(bounds)
+function FileViewer:_init(bounds, assetManager)
   self:super(bounds)
 
-  self.fileSurface = FileSurface(ui.Bounds{size=bounds.size})
+  self.fileSurface = FileSurface(ui.Bounds{size=bounds.size}, assetManager)
   self:addSubview(self.fileSurface)
 
   self.half_width = self.fileSurface.bounds.size.width/2
@@ -40,7 +40,7 @@ end
 function FileViewer:update()
 
   -- Looks at the resizeHandle's position (if it exists)
-  if self.resizeHandle ~= nil then 
+  if self.resizeHandle ~= nil and self.resizeHandle.entity then 
     local m = mat4.new(self.resizeHandle.entity.components.transform.matrix) 
     local resizeHandlePosition = m * vec3(0,0,0)
 

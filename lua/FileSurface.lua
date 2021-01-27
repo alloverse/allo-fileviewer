@@ -4,6 +4,7 @@ local tablex = require('pl.tablex')
 local vec3 = require("modules.vec3")
 local mat4 = require("modules.mat4")
 local pretty = require('pl.pretty')
+local ffi = require('ffi')
 
 local PIXELS_PER_METER = 256
 
@@ -11,23 +12,7 @@ require 'poppler'
 
 class.FileSurface(ui.View)
 
-function readall(filename)
-  local fh = assert(io.open(filename, "rb"))
-  local contents = assert(fh:read(_VERSION <= "Lua 5.2" and "*a" or "a"))
-  fh:close()
-  return contents
-end
-
-function FileSurface:redraw()
-  -- Saves the cairo surface context to disk as a png
-  self.sr:save_png("fileSurface.png")
-
-  -- Opens said png into memory
-  self.image_data = readall("fileSurface.png")
-  print(string.len(self.image_data))
-end
-
-function FileSurface:_init(bounds)
+function FileSurface:_init(bounds, assetManager)
   -- ? Sets the bounds of "ui.View" to be that which was passed to this init function
   self:super(bounds)
 
@@ -38,49 +23,51 @@ function FileSurface:_init(bounds)
   file = self.defaultFileName
   local doc = Document:open(file)
   self.doc = doc
-  
 
-  print("Opening '" .. self.defaultFileName .. "' with " .. doc:pageCount() .. " pages" )
-  
-  --self.documentTitle = doc:title() 
-  self.pageCount = doc:pageCount() or 1
-  self.currentPage = 1
-
-  local page = doc:getPage(1)
-  local pageSizePx = page:size()
-  --print("Page size (px):", pageSizePx.width, " x ", pageSizePx.height)
-
+  local pageSizePx = doc:getPage(1):size()
   -- Sets the size of the FileSurface
   bounds.size.width = pageSizePx.width/PIXELS_PER_METER
   bounds.size.height = pageSizePx.height/PIXELS_PER_METER
 
-  -- print("bounds.size.width:", bounds.size.width)
-  -- print("bounds.size.height:", bounds.size.height)
-
-  -- Creates a cairo image surface matching the pixel size of the actual file
-  self.sr = cairo.image_surface(cairo.cairo_format("rgb24"), pageSizePx.width, pageSizePx.height)
-  self.cr = self.sr:context()
-
-  -- Renders the file to the surface.
-  self.cr:save();
-  self.cr:rgb(255, 255, 255)
-  self.cr:paint()
-  page:renderToCairoSurface(self.cr)
-  self.cr:restore();
-
-  self.cr:source(self.sr)
-  self.cr:paint()
-
-  self:redraw()
-
-  self:updateComponents(
-    self:specification()
-  )
+  self.assets = {}
+  for i = 1, doc:pageCount() do
+    local asset = self:_render(i)
+    table.insert(self.assets, asset)
+    assetManager:add(asset)
+  end
+  
+  --self.documentTitle = doc:title() 
+  self.pageCount = doc:pageCount() or 1
+  self.currentPage = 1
 end
 
+-- Render a page to an asset
+function FileSurface:_render(pagenr)
+  local page = self.doc:getPage(pagenr)
+  local pageSizePx = page:size()
+  
+  -- Creates a cairo image surface matching the pixel size of the actual file
+  local sr = cairo.image_surface(cairo.cairo_format("rgb24"), pageSizePx.width, pageSizePx.height)
+  local cr = sr:context()
+  cr:rgb(255, 255, 255)
+  cr:paint()
+  page:renderToCairoSurface(cr)
+
+  local data = ""
+  local ret = sr:save_png(function(_, bytes, len)
+      data = data..ffi.string(bytes, len)
+      return 0
+  end, nil)
+  return Asset(data)
+end
+
+function FileSurface:_material()
+  return {
+    asset_texture = self.assets[self.currentPage]:id()
+  }
+end
 
 function FileSurface:specification()
-  self:redraw()
   local s = self.bounds.size
   local w2 = s.width / 2.0
   local h2 = s.height / 2.0
@@ -97,9 +84,7 @@ function FileSurface:specification()
           type= "box",
           width= s.width, height= s.height, depth= s.depth
       },
-      material = {
-        asset_texture = "page"..self.currentPage
-      },
+      material = self:_material(),
       grabbable = {
         grabbable = true,
         actuate_on= "$parent"
@@ -107,82 +92,39 @@ function FileSurface:specification()
   })
 
   return mySpec
+end
 
+function FileSurface:update()
+  self:updateComponents({material = self:_material()})
 end
 
 
 function FileSurface:resize(newWidth, newHeight)
-
   local oldWidth = self.bounds.size.width
   local oldHeight = self.bounds.size.height
 
   -- On proceed with resizing if a meaningful resize (more than 1cm) has been made
   if math.abs(oldWidth - newWidth) < 0.01 and math.abs(oldHeight - newHeight) < 0.01 then return end
 
-  print("Resizing...")
-
   self.bounds.size.width = newWidth
   self.bounds.size.height = newHeight
 
-  self:loadPdfToSurface(self.defaultFileName)
+  print("resized")
+  self:updateComponents(self:specification())
 end
 
 function FileSurface:goToNextPage()
-  self.currentPage = (self.currentPage % self.pageCount) + 1
-  self:loadPdfToSurface(self.defaultFileName)
+  self.currentPage = self.currentPage + 1
+  if self.currentPage < 1 then self.currentPage = #self.assets end
+  if self.currentPage > #self.assets then self.currentPage = 1 end
+  self:update()
 end
 
 function FileSurface:goToPreviousPage()
-  
-  local i = self.currentPage - 1
-  -- LUL it's late and I couldn't get my modulo formula to work
-  if i == 0 then
-    i = self.pageCount
-  end
-  self.currentPage = i  
-
-  self:loadPdfToSurface(self.defaultFileName)
+  self.currentPage = self.currentPage - 1
+  if self.currentPage < 1 then self.currentPage = #self.assets end
+  if self.currentPage > #self.assets then self.currentPage = 1 end
+  self:update()
 end
-
-
-function FileSurface:loadPdfToSurface(file)
-  local doc = self.doc
-  local page = doc:getPage(self.currentPage)
-  local pageSizePx = page:size()
-
-  -- print("Page size:", pageSizePx.width, " x ", pageSizePx.height)
-  -- print("Current page: ", self.currentPage)
-
-  self.cr:save()
-  self.cr:rgb(255, 255, 255)
-  self.cr:paint()
-  page:renderToCairoSurface(self.cr)
-  self.cr:restore()
-
-  self:redraw()
-
-  self.cr:source(self.sr)
-  self.cr:paint()
-
-  self:redraw()
-  self:updateComponents(
-    self:specification()
-  )
-end
-
-function FileSurface:broadcastTextureChanged()
-  if self.app == nil then return end
-
-  local geom = self:specification().geometry
-  self:updateComponents({geometry = geom})
-  self.isDirty = false
-end
-
-function FileSurface:sendIfDirty()
-  if self.isDirty then
-    self:broadcastTextureChanged()
-  end
-end
-
 
 return FileSurface
