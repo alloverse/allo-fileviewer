@@ -17,7 +17,7 @@ print("+====================+")
 print("+ ADDING FILE VIEWER +")
 print("+====================+")
 
-local assetManager = Asset.Manager(app.client.client)
+local assetManager = app.assetManager
 local fileviewer = FileViewer(ui.Bounds(-1, 2, -1,   1, 0.5, 0.01), assetManager)
 
 app.mainView = fileviewer
