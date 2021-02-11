@@ -86,15 +86,15 @@ function FileViewer:layout()
   if self.fileSurface then
 
     -- if the surface has a file(name)
-    if self.fileSurface.defaultFileName then
+    if self.fileSurface.sampleFileName then
    
-      self.TITLE_LABEL_HEIGHT = 0.1
+      self.TITLE_LABEL_HEIGHT = 0.05
       if self.fileTitleLabel then
         self.fileTitleLabel:setBounds(ui.Bounds{pose=ui.Pose(0, self.half_height + self.TITLE_LABEL_HEIGHT, 0)})
       else
         self.fileTitleLabel = ui.Label{
           bounds= ui.Bounds(0, self.half_height + self.TITLE_LABEL_HEIGHT, 0,   self.fileSurface.bounds.size.width, self.TITLE_LABEL_HEIGHT, 0.025),
-          text= self.fileSurface.defaultFileName
+          text= self.fileSurface.sampleFileName
         }
         self.fileTitleLabel.color = {0,0,0,1}
         self:addSubview(self.fileTitleLabel)

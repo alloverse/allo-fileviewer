@@ -13,32 +13,56 @@ require 'poppler'
 class.FileSurface(ui.View)
 
 function FileSurface:_init(bounds, assetManager)
-  -- ? Sets the bounds of "ui.View" to be that which was passed to this init function
   self:super(bounds)
 
-  -- Define the default file to be used
-  self.defaultFileName = "alloverse_pitch_deck.pdf"
+  -- Pick the sample file to use ()
+  self.sampleFileName = "kpop.jpg"
   
-  -- Uses poppler to load the pdf file and read info about it
-  file = self.defaultFileName
-  local doc = Document:open(file)
-
-  local pageSizePx = doc:getPage(1):size()
-  -- Sets the size of the FileSurface
-  bounds.size.width = pageSizePx.width/PIXELS_PER_METER
-  bounds.size.height = pageSizePx.height/PIXELS_PER_METER
-
+  self.pageCount = 1
+  self.currentPage = 1
   self.assets = {}
-  for i = 1, doc:pageCount() do
-    local page = doc:getPage(i)
-    local asset = self:_render(page)
+
+  local file = "sample-files/" .. self.sampleFileName
+
+  local fileExtension = self:getFileExtension(file)
+  
+  if (fileExtension == ".pdf") then
+    -- Use poppler to load the pdf file and read info about it
+    doc = Document:open(file)
+
+    -- Sets the size of the FileSurface to match the file's size
+    local pageSizePx = doc:getPage(1):size()
+    bounds.size.width = pageSizePx.width/PIXELS_PER_METER
+    bounds.size.height = pageSizePx.height/PIXELS_PER_METER
+
+    -- Load each page of the file
+    
+    for i = 1, doc:pageCount() do
+      local page = doc:getPage(i)
+      local asset = self:_render(page)
+      table.insert(self.assets, asset)
+      assetManager:add(asset)
+    end
+    self.pageCount = doc:pageCount()
+    
+  
+  elseif (fileExtension == ".png" or fileExtension == ".jpg" or fileExtension == ".jpeg") then
+    -- TODO: I don't know the width & height of the image, so I'm setting an arbitrary meter width/height of 1
+    bounds.size.width = 1
+    bounds.size.height = 1
+
+    local asset = Asset.File(file)
+    asset.name = self.sampleFileName
     table.insert(self.assets, asset)
     assetManager:add(asset)
+  else
+    print("Error: Unsupported file extension: (" .. fileExtension .. ")")
+    return
   end
-  
-  --self.documentTitle = doc:title() 
-  self.pageCount = doc:pageCount() or 1
-  self.currentPage = 1
+end
+
+function FileSurface:getFileExtension(filename)
+  return filename:match("^.+(%..+)$")
 end
 
 -- Render a page to an asset
