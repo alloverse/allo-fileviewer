@@ -20,12 +20,13 @@ function FileViewer:_init(bounds, assetManager)
   self.half_width = self.fileSurface.bounds.size.width/2
   self.half_height = self.fileSurface.bounds.size.height/2
   self.BUTTON_SIZE = 0.2
-  self.BUTTON_DEPTH = 0.1
+  self.BUTTON_DEPTH = 0.05
   self.SPACING = 0.13;
   
   -- RESIZE HANDLE
-  self.resizeHandle = ui.ResizeHandle(ui.Bounds(self.half_width+self.SPACING, self.half_height+self.SPACING, 0.05, self.BUTTON_SIZE, self.BUTTON_SIZE, self.BUTTON_DEPTH), {1, 1, 0}, {0, 0, 0})
+  self.resizeHandle = ui.ResizeHandle(ui.Bounds(self.half_width-self.BUTTON_SIZE/2, self.half_height-self.BUTTON_SIZE/2, 0.01, self.BUTTON_SIZE, self.BUTTON_SIZE, 0.001), {1, 1, 0}, {0, 0, 0})
   self:addSubview(self.resizeHandle)
+  
 
   -- QUIT BUTTON
   self.quitButton = ui.Button(ui.Bounds{size=ui.Size(0.12,0.12, self.BUTTON_DEPTH )}:move( 0.52,0.25,0.025))
@@ -46,14 +47,14 @@ end
 function FileViewer:update()
 
   -- Looks at the resizeHandle's position (if it exists)
-  if self.resizeHandle ~= nil and self.resizeHandle.entity then 
+  if self.resizeHandle and self.resizeHandle.entity then 
     local m = mat4.new(self.resizeHandle.entity.components.transform.matrix) 
     local resizeHandlePosition = m * vec3(0,0,0)
 
-    local newWidth = resizeHandlePosition.x*2 - self.SPACING*2
-    local newHeight = resizeHandlePosition.y*2 - self.SPACING*2
+    local newWidth = resizeHandlePosition.x*2 + self.BUTTON_SIZE
+    local newHeight = resizeHandlePosition.y*2 + self.BUTTON_SIZE
 
-    if newWidth <= 1.13 then newWidth = 1.13 end
+    if newWidth <= 1 then newWidth = 1 end
     if newHeight <= 0.5 then newHeight = 0.5 end
 
     self:resize(newWidth, newHeight)

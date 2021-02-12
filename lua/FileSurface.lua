@@ -15,8 +15,8 @@ class.FileSurface(ui.View)
 function FileSurface:_init(bounds, assetManager)
   self:super(bounds)
 
-  -- Pick the sample file to use ()
-  self.sampleFileName = "kpop.jpg"
+  -- Pick the sample file to use
+  self.sampleFileName = "test_multipage.pdf"
   
   self.pageCount = 1
   self.currentPage = 1

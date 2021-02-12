@@ -18,14 +18,13 @@ print("+ ADDING FILE VIEWER +")
 print("+====================+")
 
 local assetManager = app.assetManager
-local fileviewer = FileViewer(ui.Bounds(-1, 2, -1,   1, 0.5, 0.01), assetManager)
+local fileviewer = FileViewer(ui.Bounds(-1, 1.5, -1,   1, 0.5, 0.001), assetManager)
 
 app.mainView = fileviewer
 
 
-
---Checks fileviewer refresh every second
-app:scheduleAction(0.1, true, function()
+--Checks fileviewer refresh 100 times/second
+app:scheduleAction(0.01, true, function()
   if app.connected then 
     fileviewer:update()
   end
