@@ -15,6 +15,8 @@ class.FileSurface(ui.View)
 function FileSurface:_init(bounds, assetManager)
   self:super(bounds)
 
+  self.assetManager = assetManager
+
   -- Pick the sample file to use
   self.sampleFileName = "test_multipage.pdf"
   
@@ -22,43 +24,84 @@ function FileSurface:_init(bounds, assetManager)
   self.currentPage = 1
   self.assets = {}
 
+  self.acceptedFileExtensions = {'pdf', 'jpg', 'jpeg', 'png'}
+
   local file = "sample-files/" .. self.sampleFileName
+  self:loadFile(file)
+end
 
-  local fileExtension = self:getFileExtension(file)
-  
-  if (fileExtension == ".pdf") then
-    -- Use poppler to load the pdf file and read info about it
-    doc = Document:open(file)
 
+function FileSurface:_renderDoc(doc)
     -- Sets the size of the FileSurface to match the file's size
     local pageSizePx = doc:getPage(1):size()
-    bounds.size.width = pageSizePx.width/PIXELS_PER_METER
-    bounds.size.height = pageSizePx.height/PIXELS_PER_METER
+    self.bounds.size.width = pageSizePx.width/PIXELS_PER_METER
+    self.bounds.size.height = pageSizePx.height/PIXELS_PER_METER
 
-    -- Load each page of the file
-    
+    -- Load each page of the file into assets
     for i = 1, doc:pageCount() do
       local page = doc:getPage(i)
       local asset = self:_render(page)
       table.insert(self.assets, asset)
-      assetManager:add(asset)
+      self.assetManager:add(asset)
     end
     self.pageCount = doc:pageCount()
-    
+end
+
+function FileSurface:loadAsset(asset, filename)
+  local fileExtension = self:getFileExtension(filename)
   
+  if (fileExtension == ".pdf") then
+    -- Use poppler to load the pdf file and read info about it
+    self.assets = {}
+    self.currentPage = 1
+    local doc = Document:load(asset.data)
+    self:_renderDoc(doc)
   elseif (fileExtension == ".png" or fileExtension == ".jpg" or fileExtension == ".jpeg") then
     -- TODO: I don't know the width & height of the image, so I'm setting an arbitrary meter width/height of 1
-    bounds.size.width = 1
-    bounds.size.height = 1
+    self.bounds.size.width = 1
+    self.bounds.size.height = 1
 
-    local asset = Asset.File(file)
-    asset.name = self.sampleFileName
-    table.insert(self.assets, asset)
-    assetManager:add(asset)
+    asset.name = filename
+    self.assets = {asset}
+    self.currentPage = #self.assets
+    self.assetManager:add(asset)
   else
     print("Error: Unsupported file extension: (" .. fileExtension .. ")")
     return
   end
+end
+
+function FileSurface:loadFile(file)
+  local fileExtension = self:getFileExtension(file)
+  
+  if (fileExtension == ".pdf") then
+    -- Use poppler to load the pdf file and read info about it
+    local doc = Document:open(file)
+    self:_renderDoc(doc)
+  elseif (fileExtension == ".png" or fileExtension == ".jpg" or fileExtension == ".jpeg") then
+    -- TODO: I don't know the width & height of the image, so I'm setting an arbitrary meter width/height of 1
+    self.bounds.size.width = 1
+    self.bounds.size.height = 1
+
+    local asset = ui.Asset.File(file)
+    asset.name = self.sampleFileName
+    table.insert(self.assets, asset)
+    self.assetManager:add(asset)
+  else
+    print("Error: Unsupported file extension: (" .. fileExtension .. ")")
+    return
+  end
+end
+
+function FileSurface:onFileDropped(filename, asset_id)
+  -- fetch the asset, give it to the fileSurface to load
+  self.assetManager:load(asset_id, function (name, asset)
+    if asset then
+      self:loadAsset(asset, filename)
+    else
+      print("Could not reach asset for " .. filename)
+    end
+  end)
 end
 
 function FileSurface:getFileExtension(filename)

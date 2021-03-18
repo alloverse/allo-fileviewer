@@ -22,7 +22,6 @@ local fileviewer = FileViewer(ui.Bounds(-1, 1.5, -1,   1, 0.5, 0.001), assetMana
 
 app.mainView = fileviewer
 
-
 --Checks fileviewer refresh 100 times/second
 app:scheduleAction(0.01, true, function()
   if app.connected then 

@@ -26,6 +26,7 @@ const char *poppler_get_version(void);
 
 // document
 PopplerDocument *poppler_document_new_from_file(const char *uri, const char *password, GError **error);
+PopplerDocument *poppler_document_new_from_data(const char *data, int length, const char *password, GError **error);
 int poppler_document_get_n_pages(PopplerDocument *document);
 PopplerPage *poppler_document_get_page(PopplerDocument *document, int index);
 gchar *poppler_document_get_title(PopplerDocument *document);
@@ -77,6 +78,21 @@ function Document:open(file)
   local doc = poppler.poppler_document_new_from_file(file, nil, err.err)
   err:throw()
   
+  local t = {
+    doc = doc
+  }
+  setmetatable(t, self)
+  self.__index = self
+  return t
+end
+
+--- Load a document from data
+function Document:load(data)
+  local err = Error:new()
+
+  local doc = poppler.poppler_document_new_from_data(data, #data, nil, err.err)
+  err:throw()
+
   local t = {
     doc = doc
   }

@@ -14,6 +14,7 @@ FileViewer.assets = {
 function FileViewer:_init(bounds, assetManager)
   self:super(bounds)
 
+  self.assetManager = assetManager
   self.fileSurface = FileSurface(ui.Bounds{size=bounds.size}, assetManager)
   self:addSubview(self.fileSurface)
 
@@ -37,7 +38,6 @@ function FileViewer:_init(bounds, assetManager)
   self:addSubview(self.quitButton)
   
   self:layout()
-
 end
 
 function FileViewer:specification()
