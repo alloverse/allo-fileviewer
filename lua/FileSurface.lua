@@ -18,7 +18,8 @@ function FileSurface:_init(bounds, assetManager)
   self.assetManager = assetManager
 
   -- Pick the sample file to use
-  self.sampleFileName = "test_multipage.pdf"
+  self.sampleFileName = "210705 AECTECH Presentation.pdf"
+  --self.sampleFileName = "AECTECH script.pdf"
   
   self.pageCount = 1
   self.currentPage = 1
@@ -164,6 +165,16 @@ function FileSurface:update()
   self:updateComponents({material = self:_material()})
 end
 
+function FileSurface:onTouchUp(pointer)
+  -- Go to next/previous page when touching the fileSurface
+  if self.pageCount > 1 then
+    if self:convertPointFromView(pointer.pointedTo, nil).x > 0 then
+      self:goToNextPage()
+    else
+      self:goToPreviousPage()
+    end
+  end
+end
 
 function FileSurface:resize(newWidth, newHeight)
   local oldWidth = self.bounds.size.width

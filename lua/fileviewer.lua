@@ -101,29 +101,6 @@ function FileViewer:layout()
         self:addSubview(self.fileTitleLabel)
       end
     end
-
-    if self.fileSurface.pageCount > 1 then
-
-      if self.nextPageButton and self.previousPageButton then
-        self.nextPageButton:setBounds(ui.Bounds{pose=ui.Pose(self.half_width+self.SPACING, 0, 0), size=self.nextPageButton.bounds.size})
-        self.previousPageButton:setBounds(ui.Bounds{pose=ui.Pose(-self.half_width-self.SPACING, 0, 0), size=self.previousPageButton.bounds.size})  
-      else 
-        -- Create & add the next/prev buttons
-        self.previousPageButton = ui.Button(ui.Bounds(-self.half_width-self.SPACING, 0, 0.05, self.BUTTON_SIZE, self.BUTTON_SIZE, self.BUTTON_DEPTH), {1, 1, 0}, {0, 0, 0})
-        self.previousPageButton:setDefaultTexture(FileViewer.assets.previousPage)
-        self.previousPageButton.onActivated = function()
-          self:goToPreviousPage()
-        end
-        self:addSubview(self.previousPageButton)
-
-        self.nextPageButton = ui.Button(ui.Bounds(self.half_width+self.SPACING, 0, 0.05, self.BUTTON_SIZE, self.BUTTON_SIZE, self.BUTTON_DEPTH), {1, 1, 0}, {0, 0, 0})
-        self.nextPageButton:setDefaultTexture(FileViewer.assets.nextPage)
-        self.nextPageButton.onActivated = function()
-          self:goToNextPage()
-        end
-        self:addSubview(self.nextPageButton)
-      end
-    end   
     
   end
 
