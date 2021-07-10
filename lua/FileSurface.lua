@@ -181,12 +181,13 @@ function FileSurface:resize(newWidth, newHeight)
   local oldHeight = self.bounds.size.height
 
   -- On proceed with resizing if a meaningful resize (more than 1cm) has been made
-  if math.abs(oldWidth - newWidth) < 0.01 and math.abs(oldHeight - newHeight) < 0.01 then return end
+  if math.abs(oldWidth - newWidth) < 0.01 and math.abs(oldHeight - newHeight) < 0.01 then return false end
 
   self.bounds.size.width = newWidth
   self.bounds.size.height = newHeight
 
   self:updateComponents(self:specification())
+  return true
 end
 
 function FileSurface:goToNextPage()

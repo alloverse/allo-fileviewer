@@ -63,8 +63,9 @@ function FileViewer:update()
 end
 
 function FileViewer:resize(newWidth, newHeight)
-  self.fileSurface:resize(newWidth, newHeight)
-  self:layout()
+  if self.fileSurface:resize(newWidth, newHeight) then
+    self:layout()
+  end
 end
 
 function FileViewer:goToNextPage()
