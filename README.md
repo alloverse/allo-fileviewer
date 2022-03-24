@@ -1,6 +1,6 @@
 # allo-fileviewer
 
-A basic pdf viewer for use within an Alloverse Place.
+A basic pdf- and image viewer for use within an Alloverse Place. Drag & drop files from your desktop to the App to view them inside Alloverse.
 
 # Develop and run
 
