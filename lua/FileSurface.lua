@@ -18,8 +18,7 @@ function FileSurface:_init(bounds, assetManager)
   self.assetManager = assetManager
 
   -- Pick the sample file to use
-  self.sampleFileName = "210705 AECTECH Presentation.pdf"
-  --self.sampleFileName = "AECTECH script.pdf"
+  self.sampleFileName = "drag files here.pdf"
   
   self.pageCount = 1
   self.currentPage = 1
