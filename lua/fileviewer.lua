@@ -27,7 +27,6 @@ function FileViewer:_init(bounds, assetManager)
   -- RESIZE HANDLE
   self.resizeHandle = ui.ResizeHandle(ui.Bounds(self.half_width-self.BUTTON_SIZE/2, self.half_height-self.BUTTON_SIZE/2, 0.01, self.BUTTON_SIZE, self.BUTTON_SIZE, 0.001), {1, 1, 0}, {0, 0, 0})
   self:addSubview(self.resizeHandle)
-  
 
   -- QUIT BUTTON
   self.quitButton = ui.Button(ui.Bounds{size=ui.Size(0.12,0.12, self.BUTTON_DEPTH )}:move( 0.52,0.25,0.025))
@@ -47,8 +46,8 @@ end
 function FileViewer:update()
 
   -- Looks at the resizeHandle's position (if it exists)
-  if self.resizeHandle and self.resizeHandle.entity then 
-    local m = mat4.new(self.resizeHandle.entity.components.transform.matrix) 
+  if self.resizeHandle and self.resizeHandle.entity and self.resizeHandle.active then 
+    local m = mat4.new(self.resizeHandle.entity.components.transform.matrix)
     local resizeHandlePosition = m * vec3(0,0,0)
 
     local newWidth = resizeHandlePosition.x*2 + self.BUTTON_SIZE
@@ -84,10 +83,15 @@ function FileViewer:layout()
   
   self.quitButton:setBounds(ui.Bounds{pose=ui.Pose(self.half_width+self.SPACING - self.BUTTON_SIZE, self.half_height+self.SPACING, 0.05), size=self.quitButton.bounds.size})
 
+  if not self.resizeHandle.active then
+    self.resizeHandle.bounds:moveToOrigin():move(self.half_width-self.BUTTON_SIZE/2, self.half_height-self.BUTTON_SIZE/2, 0.01, self.BUTTON_SIZE, self.BUTTON_SIZE, 0.001)
+    self.resizeHandle:markAsDirty()
+  end
 
   if self.fileSurface then
 
     -- if the surface has a file(name)
+    -- TODO: Don't create the title label here, just update its position.
     if self.fileSurface.sampleFileName then
    
       self.TITLE_LABEL_HEIGHT = 0.05

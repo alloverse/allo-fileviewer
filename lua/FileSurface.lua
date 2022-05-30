@@ -9,6 +9,7 @@ local ffi = require('ffi')
 local PIXELS_PER_METER = 256
 
 require 'poppler'
+require 'alloui.asset.cairo_asset'
 
 class.FileSurface(ui.View)
 
@@ -57,18 +58,28 @@ function FileSurface:loadAsset(asset, filename)
     local doc = Document:load(asset.data)
     self:_renderDoc(doc)
   elseif (fileExtension == ".png" or fileExtension == ".jpg" or fileExtension == ".jpeg") then
-    -- TODO: I don't know the width & height of the image, so I'm setting an arbitrary meter width/height of 1
-    self.bounds.size.width = 1
-    self.bounds.size.height = 1
+    print("loadAsset filename " .. filename)
+
+    local assetSurface = asset:getCairoSurface()
+    print("Width: ", assetSurface:width(), "Height: ",assetSurface:height())
+    
+    self.bounds.size.width = assetSurface:width() / PIXELS_PER_METER
+    self.bounds.size.height = assetSurface:height() / PIXELS_PER_METER
 
     asset.name = filename
+    self.sampleFileName = filename
     self.assets = {asset}
     self.currentPage = #self.assets
     self.assetManager:add(asset)
+
   else
     print("Error: Unsupported file extension: (" .. fileExtension .. ")")
     return
   end
+
+  self.superview:layout()
+  self:markAsDirty()
+
 end
 
 function FileSurface:loadFile(file)
@@ -79,9 +90,6 @@ function FileSurface:loadFile(file)
     local doc = Document:open(file)
     self:_renderDoc(doc)
   elseif (fileExtension == ".png" or fileExtension == ".jpg" or fileExtension == ".jpeg") then
-    -- TODO: I don't know the width & height of the image, so I'm setting an arbitrary meter width/height of 1
-    self.bounds.size.width = 1
-    self.bounds.size.height = 1
 
     local asset = ui.Asset.File(file)
     asset.name = self.sampleFileName
