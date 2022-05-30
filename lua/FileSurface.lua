@@ -19,7 +19,7 @@ function FileSurface:_init(bounds, assetManager)
   self.assetManager = assetManager
 
   -- Pick the sample file to use
-  self.sampleFileName = "drag files here.pdf"
+  self.currentFileName = "drag files here.pdf"
   
   self.pageCount = 1
   self.currentPage = 1
@@ -27,7 +27,7 @@ function FileSurface:_init(bounds, assetManager)
 
   self.acceptedFileExtensions = {'pdf', 'jpg', 'jpeg', 'png'}
 
-  local file = "sample-files/" .. self.sampleFileName
+  local file = "sample-files/" .. self.currentFileName
   self:loadFile(file)
 end
 
@@ -67,7 +67,7 @@ function FileSurface:loadAsset(asset, filename)
     self.bounds.size.height = assetSurface:height() / PIXELS_PER_METER
 
     asset.name = filename
-    self.sampleFileName = filename
+    self.currentFileName = filename
     self.assets = {asset}
     self.currentPage = #self.assets
     self.assetManager:add(asset)
@@ -92,7 +92,7 @@ function FileSurface:loadFile(file)
   elseif (fileExtension == ".png" or fileExtension == ".jpg" or fileExtension == ".jpeg") then
 
     local asset = ui.Asset.File(file)
-    asset.name = self.sampleFileName
+    asset.name = self.currentFileName
     table.insert(self.assets, asset)
     self.assetManager:add(asset)
   else

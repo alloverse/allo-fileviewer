@@ -23,7 +23,17 @@ function FileViewer:_init(bounds, assetManager)
   self.BUTTON_SIZE = 0.2
   self.BUTTON_DEPTH = 0.05
   self.SPACING = 0.13;
+
+  self.TITLE_LABEL_HEIGHT = 0.05
   
+  -- FILE TITLE LABEL
+  self.fileTitleLabel = ui.Label{
+    bounds= ui.Bounds(0, self.half_height + self.TITLE_LABEL_HEIGHT, 0,   self.fileSurface.bounds.size.width, self.TITLE_LABEL_HEIGHT, 0.025),
+    text= self.fileSurface.currentFileName
+  }
+  self.fileTitleLabel.color = {0,0,0,1}
+  self:addSubview(self.fileTitleLabel)
+
   -- RESIZE HANDLE
   self.resizeHandle = ui.ResizeHandle(ui.Bounds(self.half_width-self.BUTTON_SIZE/2, self.half_height-self.BUTTON_SIZE/2, 0.01, self.BUTTON_SIZE, self.BUTTON_SIZE, 0.001), {1, 1, 0}, {0, 0, 0})
   self:addSubview(self.resizeHandle)
@@ -88,25 +98,10 @@ function FileViewer:layout()
     self.resizeHandle:markAsDirty()
   end
 
-  if self.fileSurface then
-
-    -- if the surface has a file(name)
-    -- TODO: Don't create the title label here, just update its position.
-    if self.fileSurface.sampleFileName then
-   
-      self.TITLE_LABEL_HEIGHT = 0.05
-      if self.fileTitleLabel then
-        self.fileTitleLabel:setBounds(ui.Bounds{pose=ui.Pose(0, self.half_height + self.TITLE_LABEL_HEIGHT, 0)})
-      else
-        self.fileTitleLabel = ui.Label{
-          bounds= ui.Bounds(0, self.half_height + self.TITLE_LABEL_HEIGHT, 0,   self.fileSurface.bounds.size.width, self.TITLE_LABEL_HEIGHT, 0.025),
-          text= self.fileSurface.sampleFileName
-        }
-        self.fileTitleLabel.color = {0,0,0,1}
-        self:addSubview(self.fileTitleLabel)
-      end
-    end
-    
+  if self.fileSurface and self.fileSurface.currentFileName and  self.fileTitleLabel then
+    self.fileTitleLabel.text = self.fileSurface.currentFileName
+    self.fileTitleLabel.bounds:moveToOrigin():move(0, self.half_height + self.TITLE_LABEL_HEIGHT, 0,   self.fileSurface.bounds.size.width, self.TITLE_LABEL_HEIGHT, 0.025)
+    self.fileTitleLabel:markAsDirty()
   end
 
 end
