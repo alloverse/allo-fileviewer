@@ -10,6 +10,7 @@ local PIXELS_PER_METER = 256
 
 require 'poppler'
 require 'alloui.asset.cairo_asset'
+require 'GetImageWidthHeight'
 
 class.FileSurface(ui.View)
 
@@ -60,11 +61,17 @@ function FileSurface:loadAsset(asset, filename)
   elseif (fileExtension == ".png" or fileExtension == ".jpg" or fileExtension == ".jpeg") then
     print("loadAsset filename " .. filename)
 
-    local assetSurface = asset:getCairoSurface()
-    print("Width: ", assetSurface:width(), "Height: ",assetSurface:height())
+    -- local assetSurface = asset:getCairoSurface()
+    -- print("Width: ", assetSurface:width(), "Height: ",assetSurface:height())
     
-    self.bounds.size.width = assetSurface:width() / PIXELS_PER_METER
-    self.bounds.size.height = assetSurface:height() / PIXELS_PER_METER
+    -- self.bounds.size.width = assetSurface:width() / PIXELS_PER_METER
+    -- self.bounds.size.height = assetSurface:height() / PIXELS_PER_METER
+
+    local fileWidth, fileHeight = GetImageWidthHeight(asset:like_file())
+    self.bounds.size.width = fileWidth / PIXELS_PER_METER
+    self.bounds.size.height = fileHeight / PIXELS_PER_METER
+
+
 
     asset.name = filename
     self.currentFileName = filename
