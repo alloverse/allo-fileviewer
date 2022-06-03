@@ -63,8 +63,8 @@ function FileViewer:update()
     local newWidth = resizeHandlePosition.x*2 + self.BUTTON_SIZE
     local newHeight = resizeHandlePosition.y*2 + self.BUTTON_SIZE
 
-    if newWidth <= 1 then newWidth = 1 end
-    if newHeight <= 0.5 then newHeight = 0.5 end
+    if newWidth <= 0.1 then newWidth = 0.1 end
+    if newHeight <= 0.05 then newHeight = 0.05 end
 
     self:resize(newWidth, newHeight)
   end
