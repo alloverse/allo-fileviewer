@@ -9,6 +9,8 @@ local ffi = require('ffi')
 local PIXELS_PER_METER = 256
 
 require 'poppler'
+require 'alloui.asset.cairo_asset'
+require 'GetImageWidthHeight'
 
 class.FileSurface(ui.View)
 
@@ -18,7 +20,7 @@ function FileSurface:_init(bounds, assetManager)
   self.assetManager = assetManager
 
   -- Pick the sample file to use
-  self.sampleFileName = "drag files here.pdf"
+  self.currentFileName = "drag files here.pdf"
   
   self.pageCount = 1
   self.currentPage = 1
@@ -26,7 +28,7 @@ function FileSurface:_init(bounds, assetManager)
 
   self.acceptedFileExtensions = {'pdf', 'jpg', 'jpeg', 'png'}
 
-  local file = "sample-files/" .. self.sampleFileName
+  local file = "sample-files/" .. self.currentFileName
   self:loadFile(file)
 end
 
@@ -57,18 +59,34 @@ function FileSurface:loadAsset(asset, filename)
     local doc = Document:load(asset.data)
     self:_renderDoc(doc)
   elseif (fileExtension == ".png" or fileExtension == ".jpg" or fileExtension == ".jpeg") then
-    -- TODO: I don't know the width & height of the image, so I'm setting an arbitrary meter width/height of 1
-    self.bounds.size.width = 1
-    self.bounds.size.height = 1
+    print("loadAsset filename " .. filename)
+
+    -- local assetSurface = asset:getCairoSurface()
+    -- print("Width: ", assetSurface:width(), "Height: ",assetSurface:height())
+    
+    -- self.bounds.size.width = assetSurface:width() / PIXELS_PER_METER
+    -- self.bounds.size.height = assetSurface:height() / PIXELS_PER_METER
+
+    local fileWidth, fileHeight = GetImageWidthHeight(asset:like_file())
+    self.bounds.size.width = fileWidth / PIXELS_PER_METER
+    self.bounds.size.height = fileHeight / PIXELS_PER_METER
+
+
 
     asset.name = filename
+    self.currentFileName = filename
     self.assets = {asset}
     self.currentPage = #self.assets
     self.assetManager:add(asset)
+
   else
     print("Error: Unsupported file extension: (" .. fileExtension .. ")")
     return
   end
+
+  self.superview:layout()
+  self:markAsDirty()
+
 end
 
 function FileSurface:loadFile(file)
@@ -79,12 +97,9 @@ function FileSurface:loadFile(file)
     local doc = Document:open(file)
     self:_renderDoc(doc)
   elseif (fileExtension == ".png" or fileExtension == ".jpg" or fileExtension == ".jpeg") then
-    -- TODO: I don't know the width & height of the image, so I'm setting an arbitrary meter width/height of 1
-    self.bounds.size.width = 1
-    self.bounds.size.height = 1
 
     local asset = ui.Asset.File(file)
-    asset.name = self.sampleFileName
+    asset.name = self.currentFileName
     table.insert(self.assets, asset)
     self.assetManager:add(asset)
   else
