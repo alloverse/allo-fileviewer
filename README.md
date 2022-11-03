@@ -6,7 +6,7 @@ A basic pdf- and image viewer for use within an Alloverse Place. Drag & drop fil
 
 ## Linux
 
-1. `apt install libcairo2 cmake luajit llvm`
+1. `apt install libcairo2 libpoppler-glib-dev cmake luajit llvm`
 2. `git submodule update --init --recursive`
 3. `./allo/assist run alloplace://nevyn.places.alloverse.com`
 
